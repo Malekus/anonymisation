@@ -87,3 +87,40 @@ END;
 select getLettre(1) from dual;
 
 select getNombre('a') from dual;
+
+CREATE OR REPLACE FUNCTION bij_encode(mot IN VARCHAR)
+RETURN NUMBER
+AS
+  v_encode NUMBER := 0;
+  tailleAlphabet NUMBER := 0;
+BEGIN
+  SELECT COUNT(*) INTO tailleAlphabet FROM alphabet;
+  FOR lettre in 0..length(mot) LOOP  
+    IF lettre != 0 THEN      
+      v_encode := v_encode  + ((getNombre(SUBSTR(mot, lettre, 1))) * POWER(tailleAlphabet, length(mot) - lettre));
+    END IF;
+  END LOOP;
+  RETURN v_encode;
+END;
+/
+
+select bij_encode('ninja') from dual;
+
+CREATE OR REPLACE FUNCTION bij_decode(nombre IN NUMBER)
+RETURN VARCHAR
+AS
+  v_decode VARCHAR(255) := '';
+  tailleAlphabet NUMBER := 0;
+  v_nombre NUMBER := 0;
+BEGIN
+  v_nombre := nombre;
+  SELECT COUNT(*) INTO tailleAlphabet FROM alphabet;
+  WHILE v_nombre > 0 LOOP
+    v_decode := getLettre(MOD(v_nombre, tailleAlphabet)) || v_decode;
+    v_nombre := FLOOR(v_nombre / tailleAlphabet);
+  END LOOP;
+  RETURN v_decode;
+END;
+/
+
+select bij_decode(111846484) from dual;
